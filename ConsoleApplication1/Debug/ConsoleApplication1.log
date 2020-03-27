@@ -1,0 +1,2 @@
+﻿  main.cpp
+d:\visual studio repo\consoleapplication1\consoleapplication1\main.cpp(16): fatal error C1083: 無法開啟包含檔案: 'glm/glm.hpp': No such file or directory
