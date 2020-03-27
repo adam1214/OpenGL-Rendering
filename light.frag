@@ -2,6 +2,11 @@
 
 layout (location = 0) out vec4 fragColor;
 
+in vec3 ourColor;
+in vec2 TexCoord;
+
+uniform sampler2D ourTexture;
+
 in VS_OUT
 {
   vec3 worldPos;
@@ -24,6 +29,7 @@ void main(void)
    float diffuse = max(0.0f, dot(normal, lightDir) );
    float specular = pow(max(0.0f, dot(eye, r)), shininess);
    
-   fragColor = diffuse * color_diffuse + specular * color_specular + color_ambient;
+   fragColor = diffuse * color_diffuse + specular * color_specular + color_ambient; 
+   fragColor = texture(ourTexture, TexCoord);
 }
  

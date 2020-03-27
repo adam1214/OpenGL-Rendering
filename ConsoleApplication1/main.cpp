@@ -179,7 +179,7 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 	//Generate memory for buffers.
 	glGenVertexArrays(1, &new_node.vao);
 	glGenBuffers(3, new_node.vbo);
-	//glGenTextures(1, &new_node.texture);
+	glGenTextures(1, &new_node.texture);
 
 	//Tell the program which VAO you are going to modify
 	glBindVertexArray(new_node.vao);
@@ -193,34 +193,33 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 	if (shapes[0].mesh.normals.size()>0)
 	{
 		// Upload normal array
-		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[2]);
+		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[1]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.normals.size(), shapes[0].mesh.normals.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	}
-	/*
+	
 	if(shapes[0].mesh.texcoords.size()>0)
 	{
 
-	// Upload texCoord array
-	glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[0]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(shapes[0].mesh.texcoords), &shapes[0].mesh.texcoords, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-	//glActiveTexture(GL_TEXTURE0);	//Activate texture unit before binding texture, used when having multiple texture
+		// Upload texCoord array
+		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[2]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.texcoords.size(), shapes[0].mesh.texcoords.data(), GL_STATIC_DRAW);
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		//glActiveTexture(GL_TEXTURE0);	//Activate texture unit before binding texture, used when having multiple texture
 
-	glBindTexture( GL_TEXTURE_2D, new_node.texture);
-	unsigned int width, height;
-	unsigned short int bits;
-	unsigned char *bgr=load_bmp(texbmp, &width, &height, &bits);
-	GLenum format = (bits == 24? GL_BGR: GL_BGRA);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, bgr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	glGenerateMipmap(GL_TEXTURE_2D);
-	delete [] bgr;
+		glBindTexture( GL_TEXTURE_2D, new_node.texture);
+		unsigned int width, height;
+		unsigned short int bits;
+		unsigned char *bgr=load_bmp(texbmp, &width, &height, &bits);
+		GLenum format = (bits == 24? GL_BGR: GL_BGRA);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, bgr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		delete [] bgr;
 	}
-	*/
 
 	// Setup index buffer for glDrawElements(ebo)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_node.vbo[2]);
@@ -255,7 +254,7 @@ static void render()
 	glm::mat4 proj_matrix, model_matrix, view_matrix, eye(1.0f);
 
 	//set camera matrix
-	proj_matrix = glm::perspective(glm::radians(45.0f), (float)640 / (float)480, 1.0f, 100.0f);
+	proj_matrix = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 1.0f, 100.0f);
 	view_matrix = glm::lookAt(glm::vec3(20.0f), glm::vec3(), glm::vec3(0, 1, 0)) * glm::mat4(1.0f);
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj_matrix*view_matrix));
 
@@ -272,7 +271,7 @@ static void render()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		//Draw object
-		glDrawElements(GL_TRIANGLES, 1, GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
 
 	//Unbind VAO
