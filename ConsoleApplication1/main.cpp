@@ -207,7 +207,7 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.texcoords.size(), shapes[0].mesh.texcoords.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
-		//glActiveTexture(GL_TEXTURE0);	//Activate texture unit before binding texture, used when having multiple texture
+		glActiveTexture(GL_TEXTURE0);	//Activate texture unit before binding texture, used when having multiple texture
 
 		glBindTexture( GL_TEXTURE_2D, new_node.texture);
 		unsigned int width, height;
@@ -222,7 +222,7 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 	}
 
 	// Setup index buffer for glDrawElements(ebo)
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_node.vbo[2]);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_node.vbo[3]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * shapes[0].mesh.indices.size(), shapes[0].mesh.indices.data(), GL_STATIC_DRAW);
 	indicesCount.push_back(shapes[0].mesh.indices.size());
 
