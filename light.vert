@@ -3,9 +3,13 @@
 uniform mat4 model;
 uniform mat4 proj;
 
+out vec3 ourColor;
+out vec2 TexCoord;
+
 
 layout (location = 0) in vec4 Position;
 layout (location = 1) in vec3 Normal;
+layout (location = 2) in vec2 aTexCoord;
 
 out VS_OUT
 { 
@@ -21,4 +25,5 @@ void main(void)
    vs_out.normal = mat3(model) * Normal;
 
    gl_Position = pos;
+   TexCoord = aTexCoord;
 }

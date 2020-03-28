@@ -271,7 +271,9 @@ static void render()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		//Draw object
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		printf("111\n");
+		glDrawElements(GL_TRIANGLES, indicesCount[i], GL_UNSIGNED_INT, 0);
+		printf("222\n");
 	}
 
 	//Unbind VAO
@@ -327,7 +329,6 @@ int main()
 	glfwSetKeyCallback(window, key_callback);	//set key event handler
 												// load shader program
 	program = setup_shader(readfile("light.vert").c_str(), readfile("light.frag").c_str());
-	printf("456\n");
 	//program = setup_shader(readfile("vs.txt").c_str(), readfile("fs.txt").c_str());
 	init_shader();
 
@@ -340,8 +341,8 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{//program will keep draw here until you close the window
-		render();
 		printf("777\n");
+		render();
 		glfwSwapBuffers(window);	//swap the color buffer and show it as output to the screen.
 		glfwPollEvents();			//check if there is any event being triggered
 	}
