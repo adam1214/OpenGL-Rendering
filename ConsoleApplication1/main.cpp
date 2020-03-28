@@ -29,7 +29,7 @@ GLint projLoc;
 struct object_struct {
 	unsigned int program;
 	unsigned int vao;
-	unsigned int vbo[3];
+	unsigned int vbo[4];
 	unsigned int ebo;
 	unsigned int texture;
 	glm::mat4 model;
@@ -178,7 +178,8 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 	}
 	//Generate memory for buffers.
 	glGenVertexArrays(1, &new_node.vao);
-	glGenBuffers(3, new_node.vbo);
+	glGenBuffers(4, new_node.vbo);
+
 	glGenTextures(1, &new_node.texture);
 
 	//Tell the program which VAO you are going to modify
@@ -188,7 +189,7 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 	glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[0]);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.positions.size(), shapes[0].mesh.positions.data(), GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
 
 	if (shapes[0].mesh.normals.size()>0)
 	{
@@ -196,7 +197,7 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[1]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.normals.size(), shapes[0].mesh.normals.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
 	}
 	
 	if(shapes[0].mesh.texcoords.size()>0)
@@ -206,7 +207,7 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[2]);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.texcoords.size(), shapes[0].mesh.texcoords.data(), GL_STATIC_DRAW);
 		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
 		glActiveTexture(GL_TEXTURE0);	//Activate texture unit before binding texture, used when having multiple texture
 
 		glBindTexture( GL_TEXTURE_2D, new_node.texture);
@@ -271,14 +272,12 @@ static void render()
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
 		//Draw object
-		printf("111\n");
 		glDrawElements(GL_TRIANGLES, indicesCount[i], GL_UNSIGNED_INT, 0);
 		printf("222\n");
 	}
 
 	//Unbind VAO
 	glBindVertexArray(0);
-
 }
 
 static void reshape(GLFWwindow* window, int width, int height)
