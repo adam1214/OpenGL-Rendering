@@ -2,13 +2,14 @@
   main.cpp
 main.cpp(138): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt\stdio.h(205): note: 請參閱 'fopen' 的宣告
-main.cpp(240): warning C4018: '<': signed/unsigned 不相符
-main.cpp(251): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
-main.cpp(262): warning C4018: '<': signed/unsigned 不相符
+main.cpp(177): warning C4018: '<': signed/unsigned 不相符
+main.cpp(241): warning C4018: '<': signed/unsigned 不相符
+main.cpp(252): warning C4244: '正在初始化': 將 'double' 轉換為 'float'，由於類型不同，可能導致資料遺失
+main.cpp(263): warning C4018: '<': signed/unsigned 不相符
   正在產生程式碼
-  1 of 1605 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
+  1 of 1607 functions ( 0.1%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
+    30 functions had inline decision re-evaluated but remain unchanged
   已完成程式碼產生
   ConsoleApplication1.vcxproj -> D:\大四下\繪圖技術設計與應用\HW1\ConsoleApplication1\Release\ConsoleApplication1.exe
   ConsoleApplication1.vcxproj -> D:\大四下\繪圖技術設計與應用\HW1\ConsoleApplication1\Release\ConsoleApplication1.pdb (Full PDB)

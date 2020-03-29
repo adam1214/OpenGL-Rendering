@@ -29,7 +29,7 @@ GLint projLoc;
 struct object_struct {
 	unsigned int program;
 	unsigned int vao;
-	unsigned int vbo[4];
+	unsigned int vbo[3];
 	unsigned int ebo;
 	unsigned int texture;
 	glm::mat4 model;
@@ -164,8 +164,6 @@ static unsigned char *load_bmp(const char *bmp, unsigned int *width, unsigned in
 }
 static int add_obj(unsigned int program, const char *filename, const char *texbmp)
 {
-	object_struct new_node;
-
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 
@@ -176,62 +174,65 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 		std::cerr << err << std::endl;
 		exit(1);
 	}
-	//Generate memory for buffers.
-	glGenVertexArrays(1, &new_node.vao);
-	glGenBuffers(4, new_node.vbo);
-
-	glGenTextures(1, &new_node.texture);
-
-	//Tell the program which VAO you are going to modify
-	glBindVertexArray(new_node.vao);
-
-	// Upload postion array
-	glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[0]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.positions.size(), shapes[0].mesh.positions.data(), GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-
-	if (shapes[0].mesh.normals.size()>0)
+	for (int i = 0; i < shapes.size(); i++)
 	{
-		// Upload normal array
-		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[1]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.normals.size(), shapes[0].mesh.normals.data(), GL_STATIC_DRAW);
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+		object_struct new_node;
+		//Generate memory for buffers.
+		glGenVertexArrays(1, &new_node.vao);
+		glGenBuffers(3, new_node.vbo);
+		glGenBuffers(1, &new_node.ebo);
+		glGenTextures(1, &new_node.texture);
+
+		//Tell the program which VAO you are going to modify
+		glBindVertexArray(new_node.vao);
+
+		// Upload postion array
+		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[0]);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * shapes[i].mesh.positions.size(), shapes[i].mesh.positions.data(), GL_STATIC_DRAW);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		if (shapes[i].mesh.normals.size() > 0)
+		{
+			// Upload normal array
+			glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[1]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * shapes[i].mesh.normals.size(), shapes[i].mesh.normals.data(), GL_STATIC_DRAW);
+			glEnableVertexAttribArray(1);
+			glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		}
+
+		if (shapes[i].mesh.texcoords.size() > 0)
+		{
+			// Upload texCoord array
+			glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[2]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * shapes[i].mesh.texcoords.size(), shapes[i].mesh.texcoords.data(), GL_STATIC_DRAW);
+			glEnableVertexAttribArray(2);
+			glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+			//glActiveTexture(GL_TEXTURE0);	//Activate texture unit before binding texture, used when having multiple texture
+
+			glBindTexture(GL_TEXTURE_2D, new_node.texture);
+			unsigned int width, height;
+			unsigned short int bits;
+			unsigned char *bgr = load_bmp(texbmp, &width, &height, &bits);
+			GLenum format = (bits == 24 ? GL_BGR : GL_BGRA);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, bgr);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+			glGenerateMipmap(GL_TEXTURE_2D);
+			delete[] bgr;
+		}
+
+		// Setup index buffer for glDrawElements(ebo)
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_node.ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * shapes[i].mesh.indices.size(), shapes[i].mesh.indices.data(), GL_STATIC_DRAW);
+		indicesCount.push_back(shapes[i].mesh.indices.size());
+
+		glBindVertexArray(0);
+
+		new_node.program = program;
+
+		objects.push_back(new_node);
 	}
-	
-	if(shapes[0].mesh.texcoords.size()>0)
-	{
-
-		// Upload texCoord array
-		glBindBuffer(GL_ARRAY_BUFFER, new_node.vbo[2]);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLfloat) * shapes[0].mesh.texcoords.size(), shapes[0].mesh.texcoords.data(), GL_STATIC_DRAW);
-		glEnableVertexAttribArray(2);
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), 0);
-		glActiveTexture(GL_TEXTURE0);	//Activate texture unit before binding texture, used when having multiple texture
-
-		glBindTexture( GL_TEXTURE_2D, new_node.texture);
-		unsigned int width, height;
-		unsigned short int bits;
-		unsigned char *bgr=load_bmp(texbmp, &width, &height, &bits);
-		GLenum format = (bits == 24? GL_BGR: GL_BGRA);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, format, GL_UNSIGNED_BYTE, bgr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		glGenerateMipmap(GL_TEXTURE_2D);
-		delete [] bgr;
-	}
-
-	// Setup index buffer for glDrawElements(ebo)
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, new_node.vbo[3]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * shapes[0].mesh.indices.size(), shapes[0].mesh.indices.data(), GL_STATIC_DRAW);
-	indicesCount.push_back(shapes[0].mesh.indices.size());
-
-	glBindVertexArray(0);
-
-	new_node.program = program;
-
-	objects.push_back(new_node);
 	return objects.size() - 1;
 }
 
@@ -255,8 +256,8 @@ static void render()
 	glm::mat4 proj_matrix, model_matrix, view_matrix, eye(1.0f);
 
 	//set camera matrix
-	proj_matrix = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 1.0f, 100.0f);
-	view_matrix = glm::lookAt(glm::vec3(20.0f), glm::vec3(), glm::vec3(0, 1, 0)) * glm::mat4(1.0f);
+	proj_matrix = glm::perspective(glm::radians(45.0f), (float)800 / (float)600, 0.1f, 100.0f);
+	view_matrix = glm::lookAt(glm::vec3(0.0f, 0.0f, 30.0f), glm::vec3(), glm::vec3(0, 1, 0)) * glm::mat4(1.0f);
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(proj_matrix*view_matrix));
 
 	for (int i = 0; i<objects.size(); i++) {
@@ -265,9 +266,12 @@ static void render()
 		glBindVertexArray(objects[i].vao);
 
 		//If you don't want to rotate or move your object, you can comment the functions below.
-		model_matrix = glm::translate(eye, glm::vec3(0.0f))
+
+		model_matrix = glm::scale(model_matrix, glm::vec3(0.1, 0.1, 0.1))
+			*glm::translate(eye, glm::vec3(0.0f))
 			* glm::rotate(eye, 98.70f * time, glm::vec3(0.0f, 0.0f, 1.0f))
 			* glm::rotate(eye, 123.40f * time, glm::vec3(1.0f, 0.0f, 0.0f));
+		
 
 		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model_matrix));
 
@@ -331,7 +335,7 @@ int main()
 	//program = setup_shader(readfile("vs.txt").c_str(), readfile("fs.txt").c_str());
 	init_shader();
 
-	add_obj(program, "torus.obj", "sun.bmp");
+	add_obj(program, "table.obj", "sun.bmp");
 
 	glEnable(GL_DEPTH_TEST);
 	// prevent faces rendering to the front while they're behind other faces.
