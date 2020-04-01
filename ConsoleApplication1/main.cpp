@@ -174,15 +174,16 @@ static int add_obj(unsigned int program, const char *filename, const char *texbm
 		std::cerr << err << std::endl;
 		exit(1);
 	}
+	object_struct new_node;
+
+	//Generate memory for buffers.
+	glGenVertexArrays(1, &new_node.vao);
+	glGenBuffers(3, new_node.vbo);
+	glGenBuffers(1, &new_node.ebo);
+	glGenTextures(1, &new_node.texture);
+
 	for (int i = 0; i < shapes.size(); i++)
 	{
-		object_struct new_node;
-		//Generate memory for buffers.
-		glGenVertexArrays(1, &new_node.vao);
-		glGenBuffers(3, new_node.vbo);
-		glGenBuffers(1, &new_node.ebo);
-		glGenTextures(1, &new_node.texture);
-
 		//Tell the program which VAO you are going to modify
 		glBindVertexArray(new_node.vao);
 
@@ -241,7 +242,8 @@ static void releaseObjects()
 	for (int i = 0; i<objects.size(); i++) {
 		glDeleteVertexArrays(1, &objects[i].vao);
 		glDeleteTextures(1, &objects[i].texture);
-		glDeleteBuffers(4, objects[i].vbo);
+		glDeleteBuffers(3, objects[i].vbo);
+		glDeleteBuffers(1, &objects[i].ebo);
 	}
 	glDeleteProgram(program);
 }
